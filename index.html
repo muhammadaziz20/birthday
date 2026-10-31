@@ -236,24 +236,27 @@
         /* Chiqish: 1) konvert ortidan yuqoriga siljiydi, 2) konvertdan butunlay chiqqach
            oldinga o'tadi (z-index) va konvert ustiga yumshoq tushib kattalashadi */
         @keyframes letterOut {
-            0%   { translate: 0 calc(var(--eh) - 10px - var(--ov)); scale: .38; z-index: 2;
+            0%   { translate: 0 calc(var(--eh) - 10px - var(--ov)); scale: .38;
                    animation-timing-function: cubic-bezier(.3, 0, .2, 1); }
-            45%  { translate: 0 calc(-1 * (var(--ov) + 8px)); scale: .6; z-index: 2; }
-            46%  { translate: 0 calc(-1 * (var(--ov) + 8px)); scale: .6; z-index: 8;
+            45%  { translate: 0 calc(-1 * (var(--ov) + 8px)); scale: .6; }
+            46%  { translate: 0 calc(-1 * (var(--ov) + 8px)); scale: .6;
                    animation-timing-function: cubic-bezier(.45, 0, .2, 1); }
-            100% { translate: 0 0; scale: 1; z-index: 8; }
+            100% { translate: 0 0; scale: 1; }
         }
         /* Yopilish: teskari yo'nalishda */
         @keyframes letterIn {
-            0%   { translate: 0 0; scale: 1; z-index: 8;
+            0%   { translate: 0 0; scale: 1;
                    animation-timing-function: cubic-bezier(.45, 0, .2, 1); }
-            54%  { translate: 0 calc(-1 * (var(--ov) + 8px)); scale: .6; z-index: 8; }
-            55%  { translate: 0 calc(-1 * (var(--ov) + 8px)); scale: .6; z-index: 2;
+            54%  { translate: 0 calc(-1 * (var(--ov) + 8px)); scale: .6; }
+            55%  { translate: 0 calc(-1 * (var(--ov) + 8px)); scale: .6;
                    animation-timing-function: cubic-bezier(.3, 0, .2, 1); }
-            100% { translate: 0 calc(var(--eh) - 10px - var(--ov)); scale: .38; z-index: 2; }
+            100% { translate: 0 calc(var(--eh) - 10px - var(--ov)); scale: .38; }
         }
-        .scene.unfold .letter  { animation: letterOut 3.8s both; }
-        .scene.folding .letter { animation: letterIn 3.2s both; }
+        /* z-index alohida: translate/scale animatsiyasi asosiy oqimni band qilmasin */
+        @keyframes letterOutZ { 0%, 45% { z-index: 2; } 46%, 100% { z-index: 8; } }
+        @keyframes letterInZ  { 0%, 54% { z-index: 8; } 55%, 100% { z-index: 2; } }
+        .scene.unfold .letter  { animation: letterOut 3.8s both, letterOutZ 3.8s both; }
+        .scene.folding .letter { animation: letterIn 3.2s both, letterInZ 3.2s both; }
 
         /* Quritilgan gullar: maktub chiqib bo'lgach, o'z joyida paydo bo'ladi */
         .flower {
