@@ -832,6 +832,28 @@
             font-size: 1.05rem;
             cursor: pointer;
         }
+
+        /* Musiqa hali boshlanmagan: tugma sekin pulslab, bosish mumkinligini bildiradi */
+        .music-btn.waiting {
+            animation: musicPulse 2s ease-out infinite;
+        }
+
+        @keyframes musicPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(240, 165, 80, .55);
+            }
+
+            70%,
+            100% {
+                box-shadow: 0 0 0 12px rgba(240, 165, 80, 0);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .music-btn.waiting {
+                animation: none;
+            }
+        }
     </style>
 </head>
 
@@ -883,7 +905,7 @@
                         <polyline points="0,0 250,205 500,0" fill="none" stroke="#bd9f7e" stroke-width="1.5"
                             opacity="0.9" />
                     </svg>
-                    <div class="flap-name">Aziza</div>
+                    <div class="flap-name">Name</div>
                 </div>
                 <div class="face back">
                     <svg viewBox="0 0 500 205" preserveAspectRatio="none">
@@ -1292,38 +1314,80 @@
             const bgm = document.getElementById('bgm');
             const btn = document.getElementById('musicBtn');
             const MAX_VOL = 0.22;
-            let playing = false;
+            let playing = false;     // musiqa hozir chalinyaptimi
+            let starting = false;    // play() so'rovi javob kutyapti
+            let userPaused = false;  // foydalanuvchi o'zi to'xtatgan: o'zi qayta boshlanmaydi
+            let fadeTimer = null;
+
+            // Brauzer ijroga faqat haqiqiy bosish/tegishdan keyin ruxsat beradi: sichqoncha bosilishi,
+            // telefonda barmoqni ko'tarish (touchend/pointerup) yoki klaviatura tugmasi (Escape'dan boshqa).
+            // pointerdown va touchstart ruxsat bermaydi, shuning uchun bu yerda ular ishlatilmaydi
+            const GESTURES = ['pointerup', 'touchend', 'click', 'keydown'];
+
+            function updateUi() {
+                btn.textContent = userPaused ? '✕' : '♪';
+                // musiqa hali boshlanmagan bo'lsa, tugma nafas olib turadi
+                btn.classList.toggle('waiting', !playing && !userPaused);
+            }
 
             function fadeIn() {
+                clearInterval(fadeTimer);
                 bgm.volume = 0;
                 let v = 0;
-                const t = setInterval(() => {
+                fadeTimer = setInterval(() => {
                     v = Math.min(MAX_VOL, v + 0.01);
                     bgm.volume = v;
-                    if (v >= MAX_VOL) clearInterval(t);
+                    if (v >= MAX_VOL) clearInterval(fadeTimer);
                 }, 120);
             }
 
-            function start() {
-                bgm.play().then(() => {
-                    playing = true;
-                    btn.textContent = '♪';
-                    fadeIn();
-                }).catch(() => { });
+            function onGesture() { start(); }
+            function listen(on) {
+                GESTURES.forEach(ev => document[on ? 'addEventListener' : 'removeEventListener'](ev, onGesture, true));
             }
 
-            // Brauzerlar avtomatik ijroga ruxsat bermaydi: birinchi bosishda boshlanadi
-            const evs = ['pointerdown', 'keydown', 'touchstart'];
-            const first = () => {
-                start();
-                evs.forEach(ev => document.removeEventListener(ev, first));
-            };
-            evs.forEach(ev => document.addEventListener(ev, first));
+            function start() {
+                if (playing || starting || userPaused) return;
+                starting = true;
+                let p;
+                try { p = bgm.play(); } catch (e) { p = Promise.reject(e); }
+                Promise.resolve(p).then(() => {
+                    starting = false;
+                    playing = true;
+                    listen(false);   // boshlandi: tinglovchilar endi kerak emas
+                    fadeIn();
+                    updateUi();
+                }).catch(() => {
+                    // Brauzer rad etdi (hali haqiqiy bosish bo'lmagan). Tinglovchilar joyida qoladi:
+                    // keyingi bosish yoki tegishda yana uriniladi
+                    starting = false;
+                    updateUi();
+                });
+            }
+
+            // Tizim to'xtatib qo'ysa (qo'ng'iroq, boshqa ilova), keyingi tegishda qayta boshlanadi
+            bgm.addEventListener('pause', () => {
+                if (playing && !userPaused) { playing = false; listen(true); updateUi(); }
+            });
+
+            // 1) Sahifa ochilishi bilan urinib ko'ramiz (ba'zi brauzer va sozlamalarda ruxsat beriladi)
+            // 2) Rad etilsa, istalgan birinchi bosish/tegishda boshlanadi (tugmaning o'zi shart emas)
+            listen(true);
+            start();
+            updateUi();
+            document.addEventListener('visibilitychange', () => { if (!document.hidden) start(); });
+            window.addEventListener('pageshow', () => start());
 
             btn.addEventListener('click', e => {
                 e.stopPropagation();
-                if (playing) { bgm.pause(); playing = false; btn.textContent = '✕'; }
-                else { start(); }
+                if (playing) {
+                    bgm.pause(); playing = false; userPaused = true;
+                    clearInterval(fadeTimer);
+                } else {
+                    userPaused = false;
+                    start();
+                }
+                updateUi();
             });
         })();
     </script>
