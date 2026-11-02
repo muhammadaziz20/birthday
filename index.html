@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -467,8 +467,8 @@
             overflow-y: auto;
             font-family: 'Caveat', cursive;
             font-weight: 500;
-            font-size: 1.28rem;
-            line-height: 1.28;
+            font-size: 1.08rem;
+            line-height: 1.25;
             color: #3a2a20;
             opacity: 0;
             transition: opacity .4s ease;
@@ -481,7 +481,7 @@
 
         .letter-text .greet {
             font-weight: 700;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             color: #6b2a24;
         }
 
@@ -518,11 +518,11 @@
 
         @media (max-width: 560px) {
             .letter-text {
-                font-size: 1.08rem;
+                font-size: .98rem;
             }
 
             .letter-text .greet {
-                font-size: 1.35rem;
+                font-size: 1.25rem;
             }
         }
 
@@ -761,7 +761,9 @@
             }
         }
 
-        body.letter-open h1 { display: none; }
+        body.letter-open h1 {
+            display: none;
+        }
     </style>
 </head>
 
@@ -844,9 +846,11 @@
                 <div class="sheet">
                     <div class="letter-text">
                         <p class="greet">Dear friend,</p>
-                        <p>Letter Text Part 1</p>
-                        <p>Letter Text Part 2</p>
-                        <p>Letter Text Part 3</p>
+                        <p>I hope life brings you many beautiful things and takes you to places you’ve always dreamed
+                            of. Keep being yourself, enjoy the little things, and don’t be afraid of trying something
+                            new. I hope you achieve everything you’re working for and meet people who bring good energy
+                            into your life. And no matter how life changes, I hope you always have reasons to be happy.
+                            I’m really glad to have you as a friend.</p>
                     </div>
                     <div class="signature">— With warm wishes.</div>
                 </div>
@@ -956,8 +960,8 @@
             /* ---------- Countdown ---------- */
             (() => {
                 // 9-noyabr 23:59:59 da tugaydi => 10-noyabr 00:00:00 da 0 (Toshkent vaqti)
-                const TARGET = new Date('2026-11-10T00:00:00+05:00').getTime();
-                // const TARGET = Date.now() + 1 * 60 * 1000;
+                //const TARGET = new Date('2026-11-10T00:00:00+05:00').getTime();
+                const TARGET = Date.now() + 1 * 60 * 1000;
                 const box = document.getElementById('countdown');
                 const els = {
                     d: document.getElementById('cdD'),
